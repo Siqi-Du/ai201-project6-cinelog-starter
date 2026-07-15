@@ -39,8 +39,14 @@ curl -X POST http://127.0.0.1:5000/watchlist/<user_id>/add \
 
 ## Comment 6 — Rebase
 **What conflicted:**
-**How I resolved it:**
-**How I verified no conflict remains:**
+1. **Explicit Conflict (`.gitignore`):** Both branches added `.venv/` and `venv/`, but `main` also added `.pytest_cache/`, causing a standard merge conflict.
+2. **Silent Failure (`models.py`):** Git automatically (and incorrectly) removed the `WatchlistEntry` class because `main` had heavily refactored the film IDs to UUIDs in that exact same section.
 
+**How I resolved it:**
+1. **`.gitignore`:** I manually resolved the conflict by keeping all the ignore entries (`.venv/`, `venv/`, and `.pytest_cache/`) and removing the Git conflict markers.
+2. **`models.py`:** I manually restored the `WatchlistEntry` class back into the file, taking care to update the `film_id` column to a `String(36)` UUID so it correctly aligns with the new schema on `main`.
+
+**How I verified no conflict remains:**
+I ran `git add .gitignore` and `git rebase --continue`. After the rebase finished, I ran the full test suite with `pytest tests/ -v` to confirm all 5 tests passed and the restored `WatchlistEntry` functions flawlessly with the new UUIDs.
 ## PR Description
 <!-- Written at the end — feature overview, design decisions, manual testing steps -->
