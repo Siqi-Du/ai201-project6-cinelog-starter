@@ -1,7 +1,7 @@
 # PR Response Doc — CineLog Watchlist Feature
 
 ## AI Usage
-<!-- Fill in at the end — how you used AI tools during this project -->
+I used AI to act as a devil's advocate to stress-test my reasoning for the default visibility and sort order decisions. I provided my draft arguments and asked the AI what counterarguments a careful code reviewer would raise and what tradeoffs I might not be acknowledging. For the default visibility, the AI accurately pointed out that privacy concerns could cause users to disengage entirely if they feel their intended watch queue is broadcasted without explicit consent, prompting me to strengthen my tradeoff acknowledgment by suggesting clear UI indicators to balance the social discovery goals.
 
 ## Comment 1 — Rename
 **What I did:** Renamed `save_to_watchlist()` to `add_to_watchlist()` in `services/watchlist_service.py`. I then updated all corresponding call sites, specifically locating the one usage in `routes/watchlist/watchlist.py`.
@@ -28,14 +28,14 @@ curl -X POST http://127.0.0.1:5000/watchlist/<user_id>/add \
 **How I verified:** I used `test_add_to_collection_nonexistent_film_raises` in `tests/test_collection.py` as my model, following the exact same fixture structure (`app`, `sample_user`). Finally, I ran `pytest tests/test_watchlist.py -v` to confirm the new test passed perfectly.
 
 ## Comment 4 — Default visibility
-**My position:**
-**Reasoning:**
-**Tradeoff acknowledged:**
+**My position:** Keep `public=True` as the default for watchlists.
+**Reasoning:** CineLog thrives as a social platform where discovering films through peers is a core part of the experience. By defaulting watchlists to public, we optimize for network effects and organic discovery, encouraging users to share their anticipated films.
+**Tradeoff acknowledged:** The primary tradeoff is user privacy. Some users might treat a watchlist as a private backlog and might not realize their anticipated films are broadcasted, potentially leading to disengagement if they feel exposed. To balance this, we should ensure the UI provides a clear toggle and explicitly indicates the public default when a user creates their first entry.
 
 ## Comment 5 — Sort order
-**My position:**
-**Reasoning:**
-**Engagement with reviewer's point:**
+**My position:** Change the default sort order to "date added" (newest first), as suggested.
+**Reasoning:** A watchlist functions primarily as a queue of immediate intent. Users are most likely looking for the film they most recently decided to watch. Sorting by date added ensures immediate accessibility to fresh additions.
+**Engagement with reviewer's point:** I agree completely with your point. Alphabetical sorting is great for an archival collection where a user is browsing their entire history, but for a dynamic watchlist, temporal relevance is far more important. I will implement this change to sort by `date_added` descending.
 
 ## Comment 6 — Rebase
 **What conflicted:**
