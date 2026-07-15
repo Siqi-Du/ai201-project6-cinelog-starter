@@ -49,4 +49,24 @@ curl -X POST http://127.0.0.1:5000/watchlist/<user_id>/add \
 **How I verified no conflict remains:**
 I ran `git add .gitignore` and `git rebase --continue`. After the rebase finished, I ran the full test suite with `pytest tests/ -v` to confirm all 5 tests passed and the restored `WatchlistEntry` functions flawlessly with the new UUIDs.
 ## PR Description
-<!-- Written at the end — feature overview, design decisions, manual testing steps -->
+**Feature Overview**
+This PR introduces the new Watchlist feature for CineLog, allowing users to add films they want to watch to a personal queue. It includes the `WatchlistEntry` database model and the `POST /watchlist/<user_id>/add` endpoint with built-in deduplication logic to prevent users from adding the same film twice.
+
+**Design Decisions**
+1. **Default Visibility:** Watchlists default to `public=True`. CineLog is a social platform, and this optimizes for network effects and organic film discovery among peers.
+2. **Sort Order:** The watchlist is sorted by `date_added` descending (newest first). Since a watchlist is a dynamic queue of immediate intent, temporal relevance is far more important than alphabetical sorting.
+
+**Manual Testing Instructions**
+1. Start the Flask development server: `flask run`
+2. In a separate terminal, add a film to a user's watchlist:
+   ```bash
+   curl -X POST http://127.0.0.1:5000/watchlist/<user_id>/add \
+        -H "Content-Type: application/json" \
+        -d '{"film_id": "1"}'
+   ```
+   *Expect: `201 Created`*
+3. Send the exact same request again to test deduplication:
+   *Expect: `409 Conflict` (Already in watchlist)*
+
+## Git Log Screenshot
+![Git log history](https://github.com/user-attachments/assets/8572d79e-efe2-4311-a6b0-a4e1a6bc9e47)
